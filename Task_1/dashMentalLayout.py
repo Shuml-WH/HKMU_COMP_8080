@@ -79,7 +79,7 @@ def appLayout(app: Dash) -> html.Div:
                                 dbc.Col(dcc.Graph(id="severity-box"),width=6,),
                             ]
                     ),
-                ]
+                ]#, style = {"background-color": "#001145"}
             ),
         ]
     )

@@ -1,6 +1,8 @@
 import pandas as pd
+import os
 
-csv_path = "data/mental_health_diagnosis_treatment_.csv"
+cur_path = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(cur_path, "data", "mental_health_diagnosis_treatment_.csv")
 
 df = pd.read_csv(csv_path)
 
