@@ -31,6 +31,15 @@ def appLayout(app: Dash) -> html.Div:
                                              value="All",),
                                              width=4,
                                              ),
+
+                            dbc.Col(
+                                dcc.Input(
+                                            id="filter-patient-id",
+                                            type="number",
+                                            placeholder="Filter by Patient ID",
+                                        ),
+                                        width=4,
+                            ),
                         ]
                     ),
                     html.Br(),
@@ -96,11 +105,14 @@ def register_callbacks(app: Dash):
         Output("patients-table", "data"),
         Input("filter-diagnosis", "value"),
         Input("filter-outcome", "value"),
+        Input("filter-patient-id", "value")
     )
 
-    def update_patients_table(diagnosis_value, outcome_value):
-        df_pat = mental_data.filter_patients(diagnosis_value, outcome_value)
+    def update_patients_table(diagnosis_value, outcome_value, patient_id_value):
+        df_pat = mental_data.filter_patients(diagnosis_value, outcome_value, patient_id_value)
         return df_pat.to_dict("records")
+
+
 
 
     # from Patient table,
@@ -111,11 +123,12 @@ def register_callbacks(app: Dash):
         Input("patients-table", "data"),
     )
 
+    # selected_rows: a list of indices in Dash DataTable,  table_data: a list of dictionaries (current data)
     def update_patient_details(selected_rows, table_data):
         if not selected_rows or not table_data:
             return html.Div("Select a patient from the table.")
 
-        idx = selected_rows[0]
+        idx = selected_rows[0]  # selected_rows is a list of indices of the selected rows, [0] is the index of the first (and only) selected row
         row = table_data[idx]
         patient_id = int(row["Patient ID"])
         detail = mental_data.get_patient_detail(patient_id)
@@ -139,12 +152,14 @@ def register_callbacks(app: Dash):
                 html.Hr(),
                 html.P(f"Medication: {detail['Medication']}"),
                 html.P(f"Therapy Type: {detail['Therapy Type']}"),
-                html.P(f"Treatment Start Date: {detail['Treatment Start Date'].date()}"),
+                html.P(f"Treatment Start Date: {detail['Treatment Start Date']}"),
                 html.P(f"Treatment Duration (weeks): {detail['Treatment Duration (weeks)']}"),
                 html.P(f"AI-Detected Emotional State: {detail['AI-Detected Emotional State']}"),
                 html.P(f"Adherence to Treatment (%): {detail['Adherence to Treatment (%)']}"),
             ]
         )
+    
+
     
     # Clear Radio selection button
     @app.callback(
@@ -190,21 +205,36 @@ def register_callbacks(app: Dash):
     @app.callback(
         Output("severity-box", "figure"),
         Input("filter-diagnosis", "value"),
+        Input("filter-outcome", "value")
     )
 
-    def update_severity_box(diagnosis_value):
+    def update_severity_box(diagnosis_value, outcome_value):
         data = mental_data.get_score_distributions()
+
         if diagnosis_value and diagnosis_value != "All":
             data = data[data["Diagnosis"] == diagnosis_value]
 
+        if outcome_value and outcome_value != "All":
+            data = data[data["Outcome"] == outcome_value]
+
+        # fig = px.box(
+        #     data,
+        #     x="Outcome",
+        #     y="Symptom Severity (1-10)",
+        #     color="Outcome",
+        #     title="Symptom severity by outcome",
+        # )
+        #fig.update_layout(xaxis_title="Outcome", yaxis_title="Symptom Severity (1-10)")
+
         fig = px.box(
             data,
-            x="Outcome",
-            y="Symptom Severity (1-10)",
-            color="Outcome",
-            title="Symptom severity by outcome",
+            x="Diagnosis",
+            y="Age",
+            color="Diagnosis",
+            title="Age distribution by diagnosis",
         )
-        fig.update_layout(xaxis_title="Outcome", yaxis_title="Symptom Severity (1-10)")
+        fig.update_layout(xaxis_title="Diagnosis", yaxis_title="Age")
+
         return fig
     
 
