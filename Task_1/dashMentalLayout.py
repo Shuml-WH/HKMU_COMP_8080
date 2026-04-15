@@ -4,11 +4,17 @@ import plotly.express as px
 import plotly.graph_objects as go
 import mental_data
 
+
 def appLayout(app: Dash) -> html.Div:
     return html.Div(
         [
             html.H1(
-                "Mental Health Diagnosis & Treatment Dashboard", style={"background-color": "#41FFFF"}),
+                "Mental Health Diagnosis & Treatment Dashboard", style={
+                    "background-color": "#0f172a", "color": "#ffffff", "height": "10vh",
+                    "display" : "flex", "align-items": "center",  # flex, to align the text
+                    "position": "sticky", "top": "0", "width": "100%", "zIndex": "1000",  # sticking the top Header component while scrolling down
+                    "WebkitMaskImage": "linear-gradient(to bottom, black 85%, transparent 100%)", "maskImage": "linear-gradient(to bottom, black 85%, transparent 100%)"  # color fade
+                    }), 
             html.Hr(),
             dbc.Container(
                 [
@@ -79,6 +85,52 @@ def appLayout(app: Dash) -> html.Div:
                     ),
                     html.Hr(),
 
+                    
+                    # Add New Patient area
+                    html.H5("Add New Patient"),
+                    dbc.Row(
+                            [
+                                dbc.Col(dcc.Input(id="new-patient-id", type="number", placeholder="Patient ID"), width=2),
+                                dbc.Col(dcc.Input(id="new-age", type="number", placeholder="Age"), width=2),
+                                # dbc.Col(dcc.Input(id="new-gender", type="text", placeholder="Gender"), width=2),
+                                # dbc.Col(dcc.Input(id="new-diagnosis", type="text", placeholder="Diagnosis"), width=2),
+                                # dbc.Col(dcc.Input(id="new-outcome", type="text", placeholder="Outcome"), width=2),
+                                dbc.Col(
+                                        dcc.Dropdown(
+                                            id="new-gender",
+                                            options=[
+                                                {"label": "Male", "value": "Male"},
+                                                {"label": "Female", "value": "Female"},
+                                            ],
+                                            placeholder="Gender",
+                                        ),
+                                        width=2,
+                                    ),
+
+                                    dbc.Col(
+                                        dcc.Dropdown(
+                                            id="new-diagnosis",
+                                            options=[{"label": x, "value": x} for x in mental_data.listDiagnosis],
+                                            placeholder="Diagnosis",
+                                        ),
+                                        width=2,
+                                    ),
+
+                                    dbc.Col(
+                                        dcc.Dropdown(
+                                            id="new-outcome",
+                                            options=[{"label": y, "value": y} for y in mental_data.listOutcome],
+                                            placeholder="Outcome",
+                                        ),
+                                        width=2,
+                                    ),
+
+                                dbc.Col(html.Button("Add Patient", id="add-patient-btn"), width=2),
+
+                            ]
+                    ),
+                    html.Div(id = "add-patient-message"),
+                    html.Hr(),
 
 
                     # Summary graphs
@@ -105,10 +157,11 @@ def register_callbacks(app: Dash):
         Output("patients-table", "data"),
         Input("filter-diagnosis", "value"),
         Input("filter-outcome", "value"),
-        Input("filter-patient-id", "value")
+        Input("filter-patient-id", "value"),
+        Input("add-patient-btn", "n_clicks"),
     )
 
-    def update_patients_table(diagnosis_value, outcome_value, patient_id_value):
+    def update_patients_table(diagnosis_value, outcome_value, patient_id_value, n_clicks):
         df_pat = mental_data.filter_patients(diagnosis_value, outcome_value, patient_id_value)
         return df_pat.to_dict("records")
 
@@ -196,7 +249,8 @@ def register_callbacks(app: Dash):
             text="n_patients",
             hover_data=["Diagnosis"]
         )
-        fig.update_layout(xaxis_title="Outcome", yaxis_title="Number of patients")
+        fig.update_layout(xaxis_title="Outcome", yaxis_title="Number of patients",  
+        paper_bgcolor="#d9e2f0", plot_bgcolor="#0f172a")
         return fig
     
 
@@ -233,10 +287,37 @@ def register_callbacks(app: Dash):
             color="Diagnosis",
             title="Age distribution by diagnosis",
         )
-        fig.update_layout(xaxis_title="Diagnosis", yaxis_title="Age")
+        fig.update_layout(xaxis_title="Diagnosis", yaxis_title="Age",  
+        paper_bgcolor="#d9e2f0", plot_bgcolor="#0f172a")
 
         return fig
     
+
+    # from add patient rows
+    @app.callback(
+    Output("add-patient-message", "children"),
+    Output("new-patient-id", "value"),
+    Output("new-age", "value"),
+    Output("new-gender", "value"),
+    Output("new-diagnosis", "value"),
+    Output("new-outcome", "value"),
+    Input("add-patient-btn", "n_clicks"),
+    State("new-patient-id", "value"),
+    State("new-age", "value"),
+    State("new-gender", "value"),
+    State("new-diagnosis", "value"),
+    State("new-outcome", "value"),
+    prevent_initial_call=True,
+)
+    def add_new_patient(n_clicks, patient_id, age, gender, diagnosis, outcome):
+        if patient_id is None or age is None or not gender or not diagnosis or not outcome:
+            return "Please fill in all patient fields.", patient_id, age, gender, diagnosis, outcome
+
+        try:
+            mental_data.add_patient(patient_id, age, gender, diagnosis, outcome)
+            return f"Patient {int(patient_id)} added successfully.", None, None, None, None, None  # None = Placeholder for other columns in the csv
+        except ValueError as e:
+            return str(e), patient_id, age, gender, diagnosis, outcome
 
 
 

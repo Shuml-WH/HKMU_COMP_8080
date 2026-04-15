@@ -8,7 +8,7 @@ csv_path = os.path.join(cur_path, "data", "mental_health_diagnosis_treatment_.cs
 df = pd.read_csv(csv_path)
 
 
-# Ensure that every class implement "to_dict()"
+# Ensure that every class implement "to_dict()", for data serialization
 class Record(ABC):
     @abstractmethod
     def to_dict(self):
@@ -123,7 +123,7 @@ class MentalData:
 
 
     def get_patient_list(self):
-        cols = ["Patent ID", "Age", "Gender", "Diagnosis", "Outcome"]
+        cols = ["Patient ID", "Age", "Gender", "Diagnosis", "Outcome"]
         return self.df[cols].copy()
     
 
@@ -171,9 +171,41 @@ class MentalData:
     
 
 
+    def add_patient(self, patient_id, age, gender, diagnosis, outcome):
+        patient_id = int(patient_id)   # make sure its an int
+        if patient_id in self.df["Patient ID"].values:
+            raise ValueError("Patient ID already exists.")
+        
+        new_row = {
+            "Patient ID": int(patient_id),
+            "Age": int(age),
+            "Gender": gender,
+            "Diagnosis": diagnosis,
+            "Outcome": outcome,
+            "Symptom Severity (1-10)": None,   # setting other fields to None for placeholder
+            "Mood Score (1-10)": None,
+            "Sleep Quality (1-10)": None,
+            "Stress Level (1-10)": None,
+            "Treatment Progress (1-10)": None,
+            "Medication": None,
+            "Therapy Type": None,
+            "Treatment Start Date": pd.NaT,
+            "Treatment Duration (weeks)": None,
+            "AI-Detected Emotional State": None,
+            "Adherence to Treatment (%)": None,
+            "year": None,
+        }
+
+        self.df = pd.concat([self.df, pd.DataFrame([new_row])], ignore_index=True)
+    
+
+
 mentaldata = MentalData.from_default_csv()
 listDiagnosis = mentaldata.unique_sorted(mentaldata.df["Diagnosis"])
 listOutcome = mentaldata.unique_sorted(mentaldata.df["Outcome"])
+
+
+
 
 
 # Wrappers
@@ -197,10 +229,21 @@ def get_score_distributions():
     return mentaldata.get_score_distributions()
 
 
+def add_patient(patient_id, age, gender, diagnosis, outcome):
+    return mentaldata.add_patient(patient_id, age, gender, diagnosis, outcome)
+
+
 
 # to debug
 if __name__ == "__main__":
     print(type(get_score_distributions()))
+
+
+
+
+
+
+
 
 
 
