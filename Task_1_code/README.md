@@ -18,8 +18,8 @@ The Data used is downloaded from Kaggle - "Mental Health Diagnosis and Treatment
 The project is organized into three main Python files following the MVC pattern:
 
 - `main.py`: It initializes the Dash application and runs the local web server.
-- `mental_data-2.py` (**Model**): Contains the data structures and logic. It defines the `Person` and `Patient` and the `MentalData` class which handles loading, filtering, and updating the dataset.
-- `dashMentalLayout-3.py` (**View & Controller**): Defines the frontend layoutcontains the callback functions that map user interactions.
+- `mental_data.py` (**Model**): Contains the data structures and logic. It defines the `Person` and `Patient` and the `MentalData` class which handles loading, filtering, and updating the dataset.
+- `dashMentalLayout.py` (**View & Controller**): Defines the frontend layoutcontains the callback functions that map user interactions.
 - `data/mental_health_diagnosis_treatment_.csv`: The underlying dataset downloaded from Kaggle.
 
 
