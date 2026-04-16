@@ -1,3 +1,5 @@
-Task 1: Inside 'Task_1' folder
+## HKMU COMP 8090SEF Course Project
 
-Task 2: (on going)
+* Task 1: Please navigate to the `Task_1` folder
+
+* Task 2: Please navigate to the `Task_2` folder
