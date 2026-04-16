@@ -12,7 +12,7 @@ this project introduces and implements a **Trie (Prefix Tree)** data data struct
 
 
 ## 📂 File Structure
-* `main-3.py`: The main execution script containing the interactive command-line menu.
+* `main.py`: The main execution script containing the interactive command-line menu.
 * `spell_checker.py`: Contains the `SpellingChecker` class, which handles text cleaning, vocabulary loading, and bridges the prompt interface with the Trie data structure.
 * `trie.py`: The core implementation of the `TrieNode` and `Trie` for the Trie data structure and the recursive `dfs_search_word` DFS algorithm.
 * `p3_vocab_list.txt`: The text dataset containing the English vocabulary words.
